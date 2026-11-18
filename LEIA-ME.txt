@@ -1,0 +1,36 @@
+ALMOXARIFADO USINARA - versão instalável (PWA) com nuvem
+
+PUBLICAR
+  Publique esta pasta em hospedagem HTTPS estática (GitHub Pages, etc.).
+  Abra o endereço no celular/computador e use "Instalar app".
+
+NUVEM (Firebase) - configurar uma vez
+  1. console.firebase.google.com > Criar projeto.
+  2. Criação > Firestore Database > Criar banco (modo produção, região
+     southamerica-east1 - São Paulo).
+  3. Firestore > Regras: cole e publique:
+
+       rules_version = '2';
+       service cloud.firestore {
+         match /databases/{database}/documents {
+           match /{document=**} {
+             allow read, write: if request.auth != null;
+           }
+         }
+       }
+
+  4. Criação > Authentication > Método de login > ative "E-mail/senha".
+     Aba Usuários > Adicionar usuário (e-mail e senha de acesso do almoxarifado).
+  5. Authentication > Configurações > Domínios autorizados > adicione
+     teste1988.github.io (ou o domínio onde publicou).
+  6. Configurações do projeto > Seus apps > Web (</>) > registre o app e copie
+     o objeto firebaseConfig.
+  7. No app: Relatórios > Nuvem > cole o firebaseConfig, informe e-mail e senha
+     > Conectar. Repita em cada aparelho.
+
+  A primeira conexão envia os dados locais para a nuvem; os outros aparelhos
+  baixam. Depois tudo sincroniza sozinho e continua funcionando sem internet.
+
+IMPORTANTE
+  Não use regras abertas ("allow read, write: if true"): os dados têm nomes e
+  assinaturas de funcionários. Não coloque o backup .json na hospedagem.
