@@ -113,6 +113,16 @@ pre.doc{background:var(--surface2);border:1px solid var(--border);border-radius:
 .seg{display:inline-flex;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--surface)}
 .seg button{border:0;background:none;padding:8px 16px;font-weight:600;color:var(--fg2)}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
+.tag-area{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;align-items:flex-start}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:min(100%,264px)}
+.keypad button{font:600 22px var(--mono);padding:14px 0;border:1px solid var(--border);background:var(--surface);border-radius:10px;touch-action:manipulation}
+.keypad button:active{background:var(--accent-bg)}
+.keypad .kx{font:600 14px var(--font);color:var(--fg2)}
+.sug{flex:1;min-width:min(100%,280px);display:flex;flex-direction:column;gap:6px;max-height:420px;overflow-y:auto}
+.sug-i{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 11px;flex-wrap:wrap}
+.sug-i:hover:not([disabled]){border-color:var(--accent);background:var(--accent-bg)}
+.sug-i[disabled]{opacity:.55;cursor:not-allowed}
+.sug-i .t{flex:1;min-width:140px;font-weight:600}
 .scrim{display:none}
 @media (max-width:900px){
   .app{grid-template-columns:minmax(0,1fr)}
@@ -258,7 +268,7 @@ function textoInventario(almox){
 }
 
 /* ====================== UI base ====================== */
-const ui={tab:'terminal',almox:'Todos',busca:'',cat:'Todas',status:'Todos',periodo:'HOJE+',buscaMov:'',alStatus:'TODOS',alBusca:'',pFiltro:'TODOS',pBusca:'',fBusca:'',cxBusca:'',cartMode:'EMP',cart:[],resp:'',prev:'',obsT:'',tagMsg:'',manterTela:true};
+const ui={tab:'terminal',almox:'Todos',busca:'',cat:'Todas',status:'Todos',periodo:'HOJE+',buscaMov:'',alStatus:'TODOS',alBusca:'',pFiltro:'TODOS',pBusca:'',fBusca:'',cxBusca:'',cartMode:'EMP',cart:[],kbd:false,tagq:'',resp:'',prev:'',obsT:'',tagMsg:'',manterTela:true};
 const TABS=[['terminal','Terminal TAG','tag'],['geral','Visão geral','grid'],['mov','Movimentações','list'],['caixas','Caixas','box'],['alugados','Alugados','truck'],['perif','Periféricos','plug'],['func','Funcionários','users'],['rel','Relatórios','file']];
 function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),3200)}
 const modals=$('#modals');
@@ -370,10 +380,24 @@ function resolveTag(raw,mode){
   else if(o.status!=='EMPRESTADO')throw new Error(`${o.codigo} não está emprestado (${ST[o.status]}).`);
   return {tipo:it.tipo,codigo:o.codigo,nome:o.nome,cond:o.condicao,resp:o.responsavelAtual}
 }
+function tagCands(q,mode){
+  const t=String(q).trim();if(!t)return [];const nq=norm(t),num=/^\d+$/.test(nq);
+  const rows=[];const add=(tipo,o)=>{const code=norm(o.codigo);let r;
+    if(code.startsWith(nq))r=0;else if(code.includes(nq))r=1;else if(!num&&hit(t,o.codigo,o.nome))r=2;else return;
+    rows.push({r,tipo,codigo:o.codigo,nome:o.nome,status:o.status,resp:o.responsavelAtual,caixa:o.caixaCodigo,loc:o.localizacao})};
+  DB.ferramentas.forEach(f=>add('FERRAMENTA',f));DB.caixas.forEach(c=>add('CAIXA',c));DB.alugados.forEach(a=>add('ALUGADO',a));
+  if(mode==='DEV')perifPend().forEach(m=>add('PERIFERICO',{codigo:m.itemCodigo,nome:m.itemNome,status:'EMPRESTADO',responsavelAtual:m.responsavel}));
+  const ok=x=>!x.caixa&&(mode==='EMP'?x.status==='DISPONIVEL':x.status==='EMPRESTADO');
+  return rows.filter(x=>mode==='EMP'||x.status==='EMPRESTADO').sort((a,b)=>a.r-b.r||(ok(b)-ok(a))||a.codigo.localeCompare(b.codigo,'pt',{numeric:true})).slice(0,40).map(x=>Object.assign(x,{ok:ok(x)}))}
+function sugHTML(){
+  const q=ui.tagq.trim();if(!q)return `<div class="sub" style="padding:8px">Digite a TAG para ver as ferramentas correspondentes. Toque em uma para adicionar à lista.</div>`;
+  const l=tagCands(q,ui.cartMode);if(!l.length)return `<div class="sub" style="padding:8px">Nenhum item${ui.cartMode==='DEV'?' emprestado':''} encontrado para “${esc(q)}”.</div>`;
+  return l.map(x=>`<button type="button" class="sug-i" data-sug="${esc(x.codigo)}" ${x.ok?'':'disabled'}><span class="code">${esc(x.codigo)}</span><span class="t">${esc(x.nome)}</span><span class="sub">${x.tipo.toLowerCase()}${x.caixa?' · na caixa '+esc(x.caixa):''}${x.resp?' · com '+esc(x.resp):''}</span>${pill(x.status)}</button>`).join('')}
 VIEWS.terminal=()=>{
   const emp=ui.cartMode==='EMP';
   return `<div class="card"><div class="toolbar"><div class="seg" role="group" aria-label="Modo"><button data-mode="EMP" aria-pressed="${emp}">Empréstimo</button><button data-mode="DEV" aria-pressed="${!emp}">Devolução</button></div><span class="sub grow">Digite ou leia a TAG/código do item e pressione Enter.</span></div>
-  <div class="toolbar" style="margin-top:12px"><input class="tag-input grow" id="tagIn" placeholder="TAG ou código (ex.: 506, 559, LOC-01)" autocomplete="off" inputmode="text"><button class="btn pri" id="tagAdd">Adicionar</button><button class="btn" id="tagMan">Item avulso</button></div>
+  <div class="toolbar" style="margin-top:12px"><input class="tag-input grow" id="tagIn" placeholder="TAG ou código (ex.: 506, 559, LOC-01)" autocomplete="off" inputmode="${ui.kbd?'text':'none'}" value="${esc(ui.tagq)}"><button class="btn pri" id="tagAdd">Adicionar</button><button class="btn" id="tagMan">Item avulso</button></div>
+  <div class="tag-area"><div><div class="keypad" id="keypad">${[1,2,3,4,5,6,7,8,9].map(n=>`<button type="button" data-k="${n}">${n}</button>`).join('')}<button type="button" class="kx" data-k="C">Limpar</button><button type="button" data-k="0">0</button><button type="button" class="kx" data-k="B" aria-label="Apagar">⌫</button></div><div class="toolbar" style="margin-top:8px"><button type="button" class="btn sm" id="kbdTg">${ui.kbd?'Usar teclado numérico':'Teclado completo (letras)'}</button></div></div><div class="sug" id="tagSug">${sugHTML()}</div></div>
   ${ui.tagMsg?`<div class="err" style="margin-top:10px">${esc(ui.tagMsg)}</div>`:''}</div>
   <div class="card"><h2>Itens para ${emp?'empréstimo':'devolução'} (${ui.cart.length})</h2>
    ${ui.cart.length?`<div class="cart">${ui.cart.map((x,i)=>`<div class="cart-item"><span class="code">${esc(x.codigo)}</span><span class="t">${esc(x.nome)}</span><span class="sub">${x.tipo.toLowerCase()}${x.qtd?` · qtd ${esc(x.qtd)}`:''}${!emp&&x.resp?` · com ${esc(x.resp)}`:''}</span><button class="icon-btn" data-rm="${i}" aria-label="Remover">${ic('x',16)}</button></div>`).join('')}</div>`:'<div class="empty">Nenhum item adicionado ainda.</div>'}
@@ -386,9 +410,18 @@ VIEWS.terminal=()=>{
 };
 ACT.terminal=()=>{
   bind('[data-mode]','click',b=>{ui.cartMode=b.dataset.mode;ui.cart=[];ui.tagMsg='';render()});
-  const inp=$('#tagIn'),add=()=>{const v=inp.value;if(!v.trim())return;try{const it=resolveTag(v,ui.cartMode);if(ui.cart.some(x=>x.codigo===it.codigo))throw new Error(`${it.codigo} já está na lista.`);ui.cart.push(it);ui.tagMsg='';if(ui.cartMode==='DEV'&&!ui.resp&&it.resp)ui.resp=it.resp;if(ui.cartMode==='DEV'&&it.resp&&it.resp!==ui.resp&&ui.cart.length>1)ui.tagMsg=`Atenção: itens com responsáveis diferentes (${ui.resp} e ${it.resp}).`}catch(e){ui.tagMsg=e.message}render();$('#tagIn')?.focus()};
+  const inp=$('#tagIn');
+  const addCode=v=>{if(!String(v).trim())return;try{const it=resolveTag(v,ui.cartMode);if(ui.cart.some(x=>x.codigo===it.codigo))throw new Error(`${it.codigo} já está na lista.`);ui.cart.push(it);ui.tagMsg='';if(ui.cartMode==='DEV'&&!ui.resp&&it.resp)ui.resp=it.resp;if(ui.cartMode==='DEV'&&it.resp&&it.resp!==ui.resp&&ui.cart.length>1)ui.tagMsg=`Atenção: itens com responsáveis diferentes (${ui.resp} e ${it.resp}).`;ui.tagq=''}catch(e){ui.tagMsg=e.message}render();if(ui.kbd||!matchMedia('(pointer:coarse)').matches)$('#tagIn')?.focus()};
+  const add=()=>{const v=inp.value,c=tagCands(v,ui.cartMode).filter(x=>x.ok);
+    try{resolveTag(v,ui.cartMode);addCode(v)}catch(e){if(c.length===1)addCode(c[0].codigo);else addCode(v)}};
+  const paint=()=>{const sg=$('#tagSug');if(sg){sg.innerHTML=sugHTML();bindSug()}};
+  const bindSug=()=>document.querySelectorAll('[data-sug]').forEach(b=>b.onclick=()=>addCode(b.dataset.sug));
+  inp.oninput=()=>{ui.tagq=inp.value;paint()};
   inp.onkeydown=e=>{if(e.key==='Enter')add()};$('#tagAdd').onclick=add;
-  if(!ui.tagMsg&&!ui.cart.length)inp.focus();
+  bindSug();
+  bind('[data-k]','click',b=>{const k=b.dataset.k;ui.tagq=k==='C'?'':k==='B'?ui.tagq.slice(0,-1):ui.tagq+k;inp.value=ui.tagq;ui.tagMsg&&0;paint()});
+  $('#kbdTg').onclick=()=>{ui.kbd=!ui.kbd;render();if(ui.kbd)$('#tagIn')?.focus()};
+  if(!ui.tagMsg&&!ui.cart.length&&(ui.kbd||!matchMedia('(pointer:coarse)').matches))inp.focus();
   $('#tagMan').onclick=()=>{const emp=ui.cartMode==='EMP';
     formModal(emp?'Periférico ou consumível':'Devolver periférico',[{k:'tipo',label:'Tipo',type:'select',opts:['Periférico','Consumível'],val:'Periférico'},{k:'nome',label:'Descrição do item',req:1,ph:'Ex.: Mouse USB, Luva de raspa'},{k:'codigo',label:'Código (opcional)'},{k:'qtd',label:'Quantidade',val:'1',req:1}],'Adicionar',v=>{if(ui.cart.some(x=>x.codigo===(v.codigo||v.nome)))throw new Error('Item já está na lista.');ui.cart.push({tipo:/consum/i.test(v.tipo)?'CONSUMIVEL':'PERIFERICO',codigo:v.codigo||(/consum/i.test(v.tipo)?'CONS-':'PERIF-')+Date.now()%100000,nome:v.nome,qtd:v.qtd,cond:'Bom'});render()})};
   bind('[data-rm]','click',b=>{ui.cart.splice(+b.dataset.rm,1);render()});
