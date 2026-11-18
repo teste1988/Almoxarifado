@@ -268,7 +268,7 @@ function textoInventario(almox){
 }
 
 /* ====================== UI base ====================== */
-const ui={tab:'terminal',almox:'Todos',busca:'',cat:'Todas',status:'Todos',periodo:'HOJE+',buscaMov:'',alStatus:'TODOS',alBusca:'',pFiltro:'TODOS',pBusca:'',fBusca:'',cxBusca:'',cartMode:'EMP',cart:[],kbd:false,tagq:'',resp:'',prev:'',obsT:'',tagMsg:'',manterTela:true};
+const ui={tab:'terminal',almox:'Todos',busca:'',cat:'Todas',status:'Todos',periodo:'HOJE+',buscaMov:'',alStatus:'TODOS',alBusca:'',pFiltro:'TODOS',pBusca:'',fBusca:'',cxBusca:'',cartMode:'EMP',rp:{tipo:'itens',q:'',func:'',status:'Todos',cat:'Todas',alm:'Todos',cond:'Todas',de:'',ate:'',tmov:'Todos'},cart:[],kbd:false,tagq:'',resp:'',prev:'',obsT:'',tagMsg:'',manterTela:true};
 const TABS=[['terminal','Terminal TAG','tag'],['geral','Visão geral','grid'],['mov','Movimentações','list'],['caixas','Caixas','box'],['alugados','Alugados','truck'],['perif','Periféricos','plug'],['func','Funcionários','users'],['rel','Relatórios','file']];
 function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),3200)}
 const modals=$('#modals');
@@ -503,7 +503,7 @@ function dlgBaixa(cod){const f=getF(cod);
     Object.assign(f,{status:'BAIXADO',condicao:'Danificado / Inservível',responsavelAtual:null,dataEmprestimo:null,dataPrevisaoRetorno:null,observacoes:obs,ultimaAtualizacao:n});
     const mv=addMov({tipo:TM.BAIXA,itemTipo:'FERRAMENTA',itemCodigo:f.codigo,itemNome:f.nome,responsavel:v.resp,origem:f.localizacao,destino:v.dest,condicao:'Inservível / Baixado',observacoes:obs,documentoRef:'LAUDO-BX-'+stamp(n,true),dataHora:n});commit();showMov(mv)},{pre:`<div class="hint">${esc(f.nome)}. A baixa retira a ferramenta de circulação.</div>`})}
 function dlgHist(cod){
-  const l=DB.movs.filter(m=>m.itemCodigo===cod);const m=modal('Histórico · '+cod,movTable(l),`<button class="btn pri" data-x>Fechar</button>`,{wide:true});m.querySelector('[data-x]').onclick=()=>m.remove();m.querySelectorAll('[data-mov]').forEach(r=>r.onclick=()=>showMov(DB.movs.find(x=>x.id==r.dataset.mov)))}
+  const l=DB.movs.filter(m=>m.itemCodigo===cod);const m=modal('Histórico · '+cod,movTable(l),`${(getF(cod)||getC(cod)||getA(cod))?'<button class="btn" id="hLaudo">Emitir laudo do item</button>':''}<button class="btn pri" data-x>Fechar</button>`,{wide:true});m.querySelector('[data-x]').onclick=()=>m.remove();const hl=m.querySelector('#hLaudo');if(hl)hl.onclick=()=>laudoItem(cod);m.querySelectorAll('[data-mov]').forEach(r=>r.onclick=()=>showMov(DB.movs.find(x=>x.id==r.dataset.mov)))}
 function dlgFerr(f){
   const cx=[['','Avulsa (sem caixa)'],...DB.caixas.map(c=>[c.codigo,`Caixa ${c.codigo}`])];
   formModal(f?'Editar ferramenta '+f.codigo:'Nova ferramenta',[{k:'codigo',label:'Código / TAG',req:1,val:f?.codigo||'',ro:!!f},{k:'nome',label:'Nome',req:1,val:f?.nome||''},{k:'cat',label:'Categoria',req:1,val:f?.categoria||'',list:'dlCat'},{k:'loc',label:'Almoxarifado',type:'select',opts:ALM.L,val:f?.localizacao||ui.almox!=='Todos'&&ui.almox||ALM.P},{k:'cond',label:'Condição',type:'select',opts:COND,val:f?.condicao||'Bom'},{k:'cx',label:'Vincular à caixa',type:'select',opts:cx,val:f?.caixaCodigo||''},{k:'obs',label:'Observações',val:f?.observacoes||''}],f?'Salvar':'Cadastrar',v=>{
@@ -601,7 +601,7 @@ function emPosse(nome){const n=nome.toLowerCase(),r=[];
   perifPend().forEach(m=>{if(m.responsavel.toLowerCase()===n)r.push({tipo:'PERIFERICO',o:{codigo:m.itemCodigo,nome:m.itemNome}})});return r}
 ACT.func=()=>{inputBind('fBusca','fBusca');$('#newFu').onclick=()=>dlgFunc();bind('[data-fed]','click',b=>dlgFunc(DB.funcs.find(f=>f.matricula===b.dataset.fed)));
   bind('[data-fdet]','click',b=>{const f=DB.funcs.find(x=>x.matricula===b.dataset.fdet),p=emPosse(f.nome),h=DB.movs.filter(m=>m.responsavel.toLowerCase()===f.nome.toLowerCase()).slice(0,30);
-    const m=modal(f.nome,`<div class="two"><div><div class="sub">Matrícula</div><b>${esc(f.matricula)}</b></div><div><div class="sub">Cargo / setor</div><b>${esc(f.cargo)} · ${esc(f.setor)}</b></div></div><div>${sigSvg(f.assinaturaSvg,60)}</div><h2 class="sec-title">Em posse (${p.length})</h2>${p.map(x=>`<div class="row"><span class="code">${esc(x.o.codigo)}</span><span class="main-c">${esc(x.o.nome)}</span><span class="pill s-neutral">${x.tipo.toLowerCase()}</span></div>`).join('')||'<div class="sub">Nada em posse.</div>'}<h2 class="sec-title">Histórico recente</h2>${movTable(h)}`,`<button class="btn pri" data-x>Fechar</button>`,{wide:true});m.querySelector('[data-x]').onclick=()=>m.remove();m.querySelectorAll('[data-mov]').forEach(r=>r.onclick=()=>showMov(DB.movs.find(x=>x.id==r.dataset.mov)))});
+    const m=modal(f.nome,`<div class="two"><div><div class="sub">Matrícula</div><b>${esc(f.matricula)}</b></div><div><div class="sub">Cargo / setor</div><b>${esc(f.cargo)} · ${esc(f.setor)}</b></div></div><div>${sigSvg(f.assinaturaSvg,60)}</div><h2 class="sec-title">Em posse (${p.length})</h2>${p.map(x=>`<div class="row"><span class="code">${esc(x.o.codigo)}</span><span class="main-c">${esc(x.o.nome)}</span><span class="pill s-neutral">${x.tipo.toLowerCase()}</span></div>`).join('')||'<div class="sub">Nada em posse.</div>'}<h2 class="sec-title">Histórico recente</h2>${movTable(h)}`,`<button class="btn" id="fLaudo">Emitir laudo do funcionário</button><button class="btn pri" data-x>Fechar</button>`,{wide:true});m.querySelector('[data-x]').onclick=()=>m.remove();m.querySelector('#fLaudo').onclick=()=>emitirLaudo({tipo:'posse',q:'',func:f.nome,status:'Todos',cat:'Todas',alm:'Todos',cond:'Todas',de:'',ate:'',tmov:'Todos'});m.querySelectorAll('[data-mov]').forEach(r=>r.onclick=()=>showMov(DB.movs.find(x=>x.id==r.dataset.mov)))});
   bind('[data-flote]','click',b=>{const f=DB.funcs.find(x=>x.matricula===b.dataset.flote),av=DB.ferramentas.filter(t=>!t.caixaCodigo&&t.status==='DISPONIVEL').sort((a,b)=>a.nome.localeCompare(b.nome,'pt'));
     const m=modal('Empréstimo em lote · '+f.nome,`<input id="lq" placeholder="Filtrar ferramentas"><div id="ll" style="max-height:280px;overflow:auto"></div><div class="two"><label class="f">Previsão de retorno<input id="lp" type="date"></label><label class="f">Observações<input id="lo"></label></div><div id="le"></div>`,`<button class="btn" data-x>Cancelar</button><button class="btn pri" id="lok">Emprestar selecionadas</button>`);
     const sel=new Set();const paint=()=>{const q=m.querySelector('#lq').value;m.querySelector('#ll').innerHTML=av.filter(t=>hit(q,t.nome,t.codigo,t.categoria)).map(t=>`<label class="row" style="cursor:pointer"><input type="checkbox" style="width:auto" data-c="${esc(t.codigo)}" ${sel.has(t.codigo)?'checked':''}><span class="code">${esc(t.codigo)}</span><span class="main-c">${esc(t.nome)}</span></label>`).join('')||'<div class="empty">Nada disponível.</div>';m.querySelectorAll('[data-c]').forEach(c=>c.onchange=()=>c.checked?sel.add(c.dataset.c):sel.delete(c.dataset.c))};
@@ -616,11 +616,11 @@ function dlgFunc(f){
   const d=m.querySelector('#delFu');if(d)d.onclick=()=>{m.remove();confirmBox(`Excluir <b>${esc(f.nome)}</b>?`,()=>{DB.funcs=DB.funcs.filter(x=>x!==f);commit()},'Excluir')}}
 
 /* ---------- Relatórios / backup ---------- */
-VIEWS.rel=()=>cloudCard()+`<div class="card"><h2>Relatórios</h2><div class="toolbar"><button class="btn pri" id="rInv">Inventário atual</button><button class="btn" id="rEmp">Itens emprestados agora</button><button class="btn" id="rAtr">Devoluções atrasadas</button></div><div class="sub" style="margin-top:8px">Os relatórios respeitam o almoxarifado selecionado no topo (${esc(ui.almox)}).</div></div>
+VIEWS.rel=()=>reportCard()+cloudCard()+`<div class="card"><h2>Atalhos</h2><div class="toolbar"><button class="btn pri" id="rInv">Inventário atual</button><button class="btn" id="rEmp">Itens emprestados agora</button><button class="btn" id="rAtr">Devoluções atrasadas</button></div><div class="sub" style="margin-top:8px">Os relatórios respeitam o almoxarifado selecionado no topo (${esc(ui.almox)}).</div></div>
  <div class="card"><h2>Backup e dados</h2><p class="sub" style="margin-top:0">Os dados ficam salvos neste navegador, também sem internet. Para levar para outro aparelho ou guardar uma cópia, exporte o backup e importe no destino.</p>
  <div class="toolbar"><button class="btn pri" id="bExp">Exportar backup (.json)</button><label class="btn" style="cursor:pointer">Importar backup<input type="file" id="bImp" accept=".json,application/json" hidden></label><button class="btn danger" id="bRst">Restaurar backup de 17/11/2026</button></div></div>
  <div class="card"><h2>Resumo</h2><div class="metrics"><div class="metric"><b>${DB.ferramentas.length}</b><span>Ferramentas</span></div><div class="metric"><b>${DB.caixas.length}</b><span>Caixas</span></div><div class="metric"><b>${DB.alugados.length}</b><span>Alugados</span></div><div class="metric"><b>${DB.funcs.length}</b><span>Funcionários</span></div><div class="metric"><b>${DB.movs.length}</b><span>Movimentações</span></div></div></div>`;
-ACT.rel=()=>{cloudBind();
+ACT.rel=()=>{reportBind();cloudBind();
   $('#rInv').onclick=()=>showDoc(textoInventario(ui.almox),'Inventário');
   const lista=(tit,arr)=>showDoc([LN,'           USINARA INDUSTRIAL - CONTROLE DE ATIVOS','      '+tit,LN,'DATA / HORA  : '+dtf(Date.now()),LS,...(arr.length?arr:['Nenhum item.']),LN].join('\n'),tit);
   const ped=()=>{const r=[];DB.ferramentas.filter(f=>f.status==='EMPRESTADO'&&!f.caixaCodigo&&(ui.almox==='Todos'||f.localizacao===ui.almox)).forEach(f=>r.push({c:f.codigo,n:f.nome,r:f.responsavelAtual,p:f.dataPrevisaoRetorno,t:'Ferramenta'}));DB.caixas.filter(f=>f.status==='EMPRESTADO'&&(ui.almox==='Todos'||f.localizacao===ui.almox)).forEach(f=>r.push({c:f.codigo,n:f.nome,r:f.responsavelAtual,p:f.dataPrevisaoRetorno,t:'Caixa'}));DB.alugados.filter(f=>f.status==='EMPRESTADO'&&(ui.almox==='Todos'||f.localizacao===ui.almox)).forEach(f=>r.push({c:f.codigo,n:f.nome,r:f.responsavelAtual,p:f.dataPrevisaoRetornoColaborador,t:'Alugado'}));perifPend().forEach(m=>r.push({c:m.itemCodigo,n:m.itemNome,r:m.responsavel,p:null,t:'Periférico'}));return r};
@@ -631,6 +631,93 @@ ACT.rel=()=>{cloudBind();
   $('#bRst').onclick=()=>confirmBox('Apagar tudo e voltar ao backup de 17/11/2026 que veio com o app? Exporte um backup antes se precisar.',()=>{DB=seed();save(true);render();toast('Dados restaurados')},'Restaurar');
 };
 
+/* ====================== relatórios e laudos ====================== */
+const dayStart=v=>v?new Date(v+'T00:00:00').getTime():null;
+function diasAtraso(p){return p&&p<Date.now()?Math.max(1,Math.floor((Date.now()-p)/864e5)):0}
+function wrapTxt(t,w=W,ind='     '){const out=[];let cur='';String(t).split(' ').forEach(p=>{if((cur+' '+p).trim().length>w&&cur){out.push(cur);cur=ind+p}else cur=(cur?cur+' ':'')+p});if(cur)out.push(cur);return out}
+function reportData(rp){
+  const now=Date.now(),a=rp.alm,inAlm=x=>a==='Todos'||x===a,fn=rp.func.trim();
+  const filtros=[];if(rp.q.trim())filtros.push(`Descrição/código: "${rp.q.trim()}"`);if(fn)filtros.push(`Funcionário: ${fn}`);if(a!=='Todos')filtros.push('Almoxarifado: '+a);
+  let head,rows,lines,resumo=[],titulo,fobj=null;
+  const fm=DB.funcs.filter(f=>fn&&norm(f.nome)===norm(fn));if(fm.length===1)fobj=fm[0];else if(fn){const c=DB.funcs.filter(f=>hit(fn,f.nome,f.matricula));if(c.length===1)fobj=c[0]}
+  if(rp.tipo==='itens'){
+    titulo='LAUDO DE INVENTÁRIO / SITUAÇÃO DOS ITENS';
+    const all=[];
+    DB.ferramentas.forEach(f=>all.push({cod:f.codigo,nome:f.nome,tipo:f.caixaCodigo?'Peça da caixa '+f.caixaCodigo:'Ferramenta',cat:f.categoria,st:f.status,cond:f.condicao,loc:f.localizacao,resp:f.responsavelAtual||'',prev:f.dataPrevisaoRetorno}));
+    DB.caixas.forEach(c=>all.push({cod:c.codigo,nome:c.nome,tipo:'Caixa',cat:'Caixas',st:c.status,cond:c.condicao,loc:c.localizacao,resp:c.responsavelAtual||'',prev:c.dataPrevisaoRetorno}));
+    DB.alugados.forEach(x=>all.push({cod:x.codigo,nome:x.nome,tipo:'Alugado',cat:'Alugados',st:x.status,cond:x.condicao,loc:x.localizacao,resp:x.responsavelAtual||'',prev:x.dataPrevisaoRetornoColaborador}));
+    const l=all.filter(x=>inAlm(x.loc)&&(rp.status==='Todos'||x.st===rp.status)&&(rp.cat==='Todas'||x.cat===rp.cat)&&(rp.cond==='Todas'||x.cond===rp.cond)&&hit(rp.q,x.cod,x.nome,x.cat)&&(!fn||hit(fn,x.resp)));
+    l.sort((p,q)=>p.cod.localeCompare(q.cod,'pt',{numeric:true}));
+    if(rp.status!=='Todos')filtros.push('Status: '+ST[rp.status]);if(rp.cat!=='Todas')filtros.push('Categoria: '+rp.cat);if(rp.cond!=='Todas')filtros.push('Condição: '+rp.cond);
+    head=['Código','Descrição','Tipo','Categoria','Status','Condição','Almoxarifado','Responsável','Previsão'];
+    rows=l.map(x=>[x.cod,x.nome,x.tipo,x.cat,ST[x.st]||x.st,x.cond,x.loc,x.resp,x.prev?df(x.prev):'']);
+    lines=l.map((x,i)=>`${i+1}. [${x.cod}] ${x.nome} | ${ST[x.st]||x.st} | ${x.cond}${x.resp?' | com '+x.resp:''}`);
+    const by={};l.forEach(x=>by[ST[x.st]||x.st]=(by[ST[x.st]||x.st]||0)+1);resumo=[`Total de itens: ${l.length}`,...Object.entries(by).map(([k,v])=>`${k}: ${v}`)];
+    const bad=l.filter(x=>['Regular','Danificado','Necessita Reparo'].includes(x.cond)||/inserv/i.test(x.cond)).length;if(bad)resumo.push(`Itens com condição regular/ruim: ${bad}`)
+  }else if(rp.tipo==='mov'){
+    titulo='LAUDO DE MOVIMENTAÇÕES';
+    const d0=dayStart(rp.de),d1=toTs(rp.ate);if(rp.de||rp.ate)filtros.push(`Período: ${rp.de?df(d0):'início'} a ${rp.ate?df(d1):'hoje'}`);if(rp.tmov!=='Todos')filtros.push('Tipo: '+rp.tmov);
+    const l=DB.movs.filter(m=>(!d0||m.dataHora>=d0)&&(!d1||m.dataHora<=d1)&&(rp.tmov==='Todos'||m.tipo===rp.tmov)&&(a==='Todos'||(m.origem+' '+m.destino).includes(a))&&hit(rp.q,m.itemCodigo,m.itemNome,m.documentoRef,m.observacoes)&&(!fn||hit(fn,m.responsavel)));
+    head=['Data','Tipo','Código','Item','Responsável','Origem','Destino','Condição','Documento'];
+    rows=l.map(m=>[dtf(m.dataHora),m.tipo,m.itemCodigo,m.itemNome,m.responsavel,m.origem,m.destino,m.condicao,m.documentoRef]);
+    lines=l.map((m,i)=>`${i+1}. ${dtf(m.dataHora)} | ${m.tipo} | [${m.itemCodigo}] ${m.itemNome} | ${m.responsavel}`);
+    const by={};l.forEach(m=>by[m.tipo]=(by[m.tipo]||0)+1);resumo=[`Total de movimentações: ${l.length}`,...Object.entries(by).map(([k,v])=>`${k}: ${v}`)]
+  }else{
+    titulo='LAUDO DE ITENS EM POSSE';
+    const p=[];
+    DB.ferramentas.filter(f=>f.status==='EMPRESTADO'&&!f.caixaCodigo).forEach(f=>p.push({cod:f.codigo,nome:f.nome,tipo:'Ferramenta',resp:f.responsavelAtual||'',desde:f.dataEmprestimo,prev:f.dataPrevisaoRetorno,loc:f.localizacao}));
+    DB.caixas.filter(f=>f.status==='EMPRESTADO').forEach(f=>p.push({cod:f.codigo,nome:f.nome+` (${DB.ferramentas.filter(t=>t.caixaCodigo===f.codigo).length} peças)`,tipo:'Caixa',resp:f.responsavelAtual||'',desde:f.dataEmprestimo,prev:f.dataPrevisaoRetorno,loc:f.localizacao}));
+    DB.alugados.filter(f=>f.status==='EMPRESTADO').forEach(f=>p.push({cod:f.codigo,nome:f.nome,tipo:'Alugado',resp:f.responsavelAtual||'',desde:f.dataEmprestimoColaborador,prev:f.dataPrevisaoRetornoColaborador,loc:f.localizacao}));
+    perifPend().forEach(m=>p.push({cod:m.itemCodigo,nome:m.itemNome,tipo:'Periférico',resp:m.responsavel,desde:m.dataHora,prev:null,loc:ALM.P}));
+    const l=p.filter(x=>inAlm(x.loc)&&hit(rp.q,x.cod,x.nome)&&(!fn||hit(fn,x.resp))).sort((x,y)=>x.resp.localeCompare(y.resp,'pt')||x.cod.localeCompare(y.cod,'pt',{numeric:true}));
+    head=['Responsável','Código','Descrição','Tipo','Retirada','Previsão','Situação'];
+    const sit=x=>{const d=diasAtraso(x.prev);return d?`Atrasado ${d} dia(s)`:x.prev?'No prazo':'Sem previsão'};
+    rows=l.map(x=>[x.resp,x.cod,x.nome,x.tipo,x.desde?df(x.desde):'',x.prev?df(x.prev):'',sit(x)]);
+    lines=l.map((x,i)=>`${i+1}. [${x.cod}] ${x.nome} | ${x.tipo} | com ${x.resp}${x.desde?' desde '+df(x.desde):''} | ${sit(x)}`);
+    resumo=[`Itens em posse: ${l.length}`,`Responsáveis: ${new Set(l.map(x=>x.resp)).size}`,`Atrasados: ${l.filter(x=>diasAtraso(x.prev)).length}`]
+  }
+  return {titulo,head,rows,lines,resumo,filtros,fobj}}
+function csvOf(d){const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';return '﻿'+[d.head,...d.rows].map(r=>r.map(q).join(';')).join('\r\n')}
+function laudoText(d,o){
+  const n=Date.now(),id='LAUDO-'+stamp(n),L=[LN,'           USINARA INDUSTRIAL - CONTROLE DE ATIVOS',...wrapTxt(d.titulo,W-6,'').map(t=>'      '+t),LN,
+   `Nº LAUDO    : ${id}`,`DATA / HORA : ${dtf(n)}`,`EMITIDO POR : ${o.emitente||'Almoxarifado'}`,...(d.fobj?[`FUNCIONÁRIO : ${d.fobj.nome} (Matrícula ${d.fobj.matricula})`]:[]),...(d.filtros.length?['FILTROS     : '+d.filtros.join('; ')]:[]),LS,'RESUMO:',...d.resumo.map(x=>' • '+x),LS,`ITENS (${d.lines.length}):`];
+  d.lines.forEach(x=>wrapTxt(x,W-3,'      ').forEach(l=>L.push(' '+l)));if(!d.lines.length)L.push(' Nenhum registro para os filtros informados.');
+  L.push(LS,'CONCLUSÃO: '+o.conclusao,'PARECER TÉCNICO:',...(o.parecer?wrapTxt(o.parecer,W-2,'  ').map(x=>' '+x):[' ____________________________________________________',' ____________________________________________________']),LS,'','______________________________   ______________________________',`  ${(o.emitente||'Almoxarife').slice(0,28).padEnd(28)}     ${(d.fobj?d.fobj.nome:'Responsável / Funcionário').slice(0,28)}`,LN);
+  return {id,text:L.join('\n')}}
+function emitirLaudo(rp,preset){
+  const d=reportData(rp);
+  formModal('Emitir laudo',[{k:'emitente',label:'Emitido por',list:'dlFunc',val:preset?.emitente||''},{k:'conclusao',label:'Conclusão',type:'select',opts:['Conforme','Conforme, com ressalvas','Não conforme','Pendente de análise'],val:'Conforme'},{k:'parecer',label:'Parecer técnico (opcional)',type:'textarea',val:''}],'Gerar laudo',v=>{
+    const r=laudoText(d,v);const f=d.fobj;showDoc(r.text,r.id,f?.assinaturaSvg?{svg:f.assinaturaSvg,nome:f.nome}:null)},{pre:`<div class="hint">${d.titulo} · ${d.rows.length} registro(s)${d.fobj?' · '+esc(d.fobj.nome):''}</div>`})}
+function laudoItem(cod){
+  const it=getF(cod)||getC(cod)||getA(cod);if(!it)return toast('Item não encontrado');
+  const tipo=getF(cod)?'FERRAMENTA':getC(cod)?'CAIXA':'ALUGADO',h=DB.movs.filter(m=>m.itemCodigo===cod);
+  formModal('Laudo do item '+cod,[{k:'emitente',label:'Emitido por',list:'dlFunc'},{k:'conclusao',label:'Conclusão',type:'select',opts:['Apto para uso','Apto, com ressalvas','Necessita reparo','Inservível / baixa recomendada'],val:it.condicao==='Danificado'?'Necessita reparo':'Apto para uso'},{k:'parecer',label:'Parecer técnico',type:'textarea'}],'Gerar laudo',v=>{
+    const n=Date.now(),id='LAUDO-'+cod+'-'+stamp(n);const resp=it.responsavelAtual;
+    const L=[LN,'           USINARA INDUSTRIAL - CONTROLE DE ATIVOS','      LAUDO TÉCNICO DE '+tipo,LN,`Nº LAUDO    : ${id}`,`DATA / HORA : ${dtf(n)}`,`EMITIDO POR : ${v.emitente||'Almoxarifado'}`,LS,`CÓDIGO/TAG  : ${it.codigo}`,...wrapTxt('DESCRIÇÃO   : '+it.nome,W,'             '),`SITUAÇÃO    : ${ST[it.status]}${resp?' - com '+resp:''}`,`CONDIÇÃO    : ${it.condicao}`,`LOCAL       : ${it.localizacao}`,...(it.categoria?[`CATEGORIA   : ${it.categoria}`]:[]),...(it.caixaCodigo?[`CAIXA       : ${it.caixaCodigo}`]:[]),...(it.fornecedor?[`FORNECEDOR  : ${it.fornecedor}`]:[]),...(it.observacoes?wrapTxt('OBSERVAÇÕES : '+it.observacoes,W,'              '):[]),LS,`HISTÓRICO (últimos ${Math.min(h.length,12)} de ${h.length}):`,...(h.length?h.slice(0,12).flatMap(m=>wrapTxt(` • ${dtf(m.dataHora)} ${m.tipo} - ${m.responsavel}`,W,'     ')):[' Sem movimentações registradas.']),LS,'CONCLUSÃO: '+v.conclusao,'PARECER TÉCNICO:',...(v.parecer?wrapTxt(v.parecer,W-2,'  ').map(x=>' '+x):[' ____________________________________________________',' ____________________________________________________']),LS,'','______________________________   ______________________________',`  ${(v.emitente||'Almoxarife').slice(0,28).padEnd(28)}     ${(resp||'Responsável').slice(0,28)}`,LN];
+    const f=resp?findFunc(resp):null;showDoc(L.join('\n'),id,f?.assinaturaSvg?{svg:f.assinaturaSvg,nome:f.nome}:null)},{pre:`<div class="hint">${esc(it.nome)}</div>`})}
+function reportCard(){
+  const rp=ui.rp,d=reportData(rp),sel=(k,opts)=>`<select id="rp_${k}" data-rp="${k}">${opts.map(o=>{const [v,l]=Array.isArray(o)?o:[o,o];return `<option value="${esc(v)}"${String(rp[k])===String(v)?' selected':''}>${esc(l)}</option>`}).join('')}</select>`;
+  const cats=['Todas',...new Set(DB.ferramentas.map(f=>f.categoria)),'Caixas','Alugados'],tm=['Todos',...new Set(DB.movs.map(m=>m.tipo))];
+  const MAX=300;
+  return `<div class="card"><h2>Gerador de relatórios e laudos</h2>
+   <div class="seg" role="group" aria-label="Tipo de relatório" style="margin-bottom:12px;flex-wrap:wrap">${[['itens','Itens'],['posse','Em posse'],['mov','Movimentações']].map(([v,l])=>`<button type="button" data-rptipo="${v}" aria-pressed="${rp.tipo===v}">${l}</button>`).join('')}</div>
+   <div class="two"><label class="f">Descrição ou código<input id="rp_q" data-rp="q" value="${esc(rp.q)}" placeholder="Ex.: chave 9/16, manilha, 506" autocomplete="off"></label>
+   <label class="f">Funcionário<input id="rp_func" data-rp="func" list="dlFunc" value="${esc(rp.func)}" placeholder="Nome ou matrícula" autocomplete="off"></label>
+   <label class="f">Almoxarifado${sel('alm',['Todos',...ALM.L])}</label>
+   ${rp.tipo==='itens'?`<label class="f">Status${sel('status',[['Todos','Todos'],...Object.entries(ST)])}</label><label class="f">Categoria${sel('cat',cats)}</label><label class="f">Condição${sel('cond',['Todas',...COND,'Necessita Reparo'])}</label>`:''}
+   ${rp.tipo==='mov'?`<label class="f">Tipo de movimentação${sel('tmov',tm)}</label><label class="f">De<input id="rp_de" data-rp="de" type="date" value="${esc(rp.de)}"></label><label class="f">Até<input id="rp_ate" data-rp="ate" type="date" value="${esc(rp.ate)}"></label>`:''}</div>
+   <div class="toolbar" style="margin:12px 0"><b>${d.rows.length} registro(s)</b><span class="sub grow">${d.resumo.slice(1).join(' · ')}</span><button class="btn sm" id="rpClr">Limpar filtros</button></div>
+   <div class="tablewrap" style="max-height:360px;overflow-y:auto"><table><thead><tr>${d.head.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${d.rows.slice(0,MAX).map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')||`<tr><td colspan="${d.head.length}" class="empty">Nenhum registro para os filtros.</td></tr>`}</tbody></table></div>
+   ${d.rows.length>MAX?`<div class="sub" style="margin-top:6px">Mostrando os primeiros ${MAX}. O laudo e o CSV incluem todos.</div>`:''}
+   <div class="toolbar" style="margin-top:12px"><button class="btn pri" id="rpLaudo" ${d.rows.length?'':'disabled'}>Emitir laudo</button><button class="btn" id="rpCsv" ${d.rows.length?'':'disabled'}>Baixar planilha (CSV)</button><button class="btn" id="rpTxt" ${d.rows.length?'':'disabled'}>Ver / copiar texto</button></div></div>`}
+function reportBind(){
+  bind('[data-rptipo]','click',b=>{ui.rp.tipo=b.dataset.rptipo;render()});
+  document.querySelectorAll('[data-rp]').forEach(e=>{const h=()=>{ui.rp[e.dataset.rp]=e.value;render()};e.oninput=e.tagName==='SELECT'?null:h;e.onchange=h});
+  const c=$('#rpClr');if(c)c.onclick=()=>{ui.rp=Object.assign({},ui.rp,{q:'',func:'',status:'Todos',cat:'Todas',alm:'Todos',cond:'Todas',de:'',ate:'',tmov:'Todos'});render()};
+  const l=$('#rpLaudo');if(l)l.onclick=()=>emitirLaudo(ui.rp);
+  const v=$('#rpCsv');if(v)v.onclick=()=>{const d=reportData(ui.rp);saveFile(`relatorio-${ui.rp.tipo}-${stamp(Date.now()).slice(0,8)}.csv`,csvOf(d),'text/csv')};
+  const t=$('#rpTxt');if(t)t.onclick=()=>{const d=reportData(ui.rp);showDoc(laudoText(d,{emitente:'',conclusao:'Pendente de análise'}).text,'Relatório')};
+}
 /* ====================== nuvem (Firebase Firestore) ====================== */
 const IN_ARTIFACT=typeof claude!=='undefined';
 const FBV='10.12.2',FBU=n=>`https://www.gstatic.com/firebasejs/${FBV}/firebase-${n}-compat.js`;
