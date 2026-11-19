@@ -1,31 +1,33 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#E55913"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#8CCB6B"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
 <style>:root{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style></head><body><title>Almoxarifado Usinara</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
 /* Layout: barra lateral escura (navy) + área de trabalho clara; no celular a barra vira gaveta */
 :root{
-  --bg:#F7F5EE; --surface:#fff; --surface2:#F1EEE4; --border:#E8E5DD; --fg:#0F172A; --fg2:#64748B; --fg3:#94A3B8;
-  --accent:#E55913; --accent-d:#C2410C; --accent-bg:#FFF3EB; --on-accent:#fff;
-  --nav:#131D2A; --nav2:#223044; --nav-fg:#CBD5E1;
-  --ok:#15803D; --ok-bg:#E6F7ED; --warn:#C2410C; --warn-bg:#FEF3E8; --info:#0369A1; --info-bg:#E0F2FE;
-  --trans:#2563EB; --trans-bg:#DBEAFE; --bad:#BE123C; --bad-bg:#FFE4E6; --neutral:#475569; --neutral-bg:#F1F5F9;
-  --shadow:0 1px 2px rgba(15,23,42,.06),0 4px 14px rgba(15,23,42,.06);
+  --bg:#F4EDD6; --surface:#FBF8EC; --surface2:#EBE3C6; --border:#DDD3B0; --fg:#2B3320; --fg2:#6B7258; --fg3:#9A9F85;
+  --accent:#8CCB6B; --accent-d:#76B957; --accent-bg:#E4F2D2; --on-accent:#1F3314;
+  --nav:#DCEBC4; --nav2:#CBE0AE; --nav-fg:#40512F;
+  --ok:#2F7D32; --ok-bg:#DDF0CF; --warn:#9A5A10; --warn-bg:#F7E6C4; --info:#1F6F78; --info-bg:#D6ECE9;
+  --trans:#3B6FB0; --trans-bg:#DCE7F5; --bad:#B3382C; --bad-bg:#F6DAD3; --neutral:#5C6350; --neutral-bg:#EAE6D2;
+  --shadow:0 1px 2px rgba(60,70,30,.08),0 4px 14px rgba(60,70,30,.08);
   --font:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif; --head:'Space Grotesk','Inter',system-ui,sans-serif; --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#0E1621; --surface:#172131; --surface2:#1E2B3E; --border:#2A384D; --fg:#E7ECF3; --fg2:#9AA8BC; --fg3:#6B7A90;
-  --accent:#FF7A3D; --accent-d:#FF9460; --accent-bg:#3A2418; --on-accent:#1a0e06;
-  --nav:#0A111A; --nav2:#1B2738; --nav-fg:#B6C2D2;
-  --ok:#4ADE80; --ok-bg:#12301F; --warn:#FDA066; --warn-bg:#3A2415; --info:#5CC2F2; --info-bg:#0E2C40;
-  --trans:#7FA8FF; --trans-bg:#1A2B52; --bad:#FB7185; --bad-bg:#3D1620; --neutral:#B6C2D2; --neutral-bg:#233046;
-  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25);color-scheme:dark}}
+  --bg:#1A1F14; --surface:#232A1C; --surface2:#2C3523; --border:#39432E; --fg:#EEF0DF; --fg2:#B2B89D; --fg3:#7F866B;
+  --accent:#A5D97F; --accent-d:#BCE79B; --accent-bg:#2E3D22; --on-accent:#14200C;
+  --nav:#12160D; --nav2:#222B19; --nav-fg:#C9CFB2;
+  --ok:#8FDC8A; --ok-bg:#1F3A1D; --warn:#F0B866; --warn-bg:#3A2D12; --info:#6FD0D8; --info-bg:#12363A;
+  --trans:#8FB2F0; --trans-bg:#1D2F52; --bad:#F2877A; --bad-bg:#40201B; --neutral:#C9CFB2; --neutral-bg:#2C3523;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25);color-scheme:dark
+}}
 :root[data-theme="dark"]{
-  --bg:#0E1621; --surface:#172131; --surface2:#1E2B3E; --border:#2A384D; --fg:#E7ECF3; --fg2:#9AA8BC; --fg3:#6B7A90;
-  --accent:#FF7A3D; --accent-d:#FF9460; --accent-bg:#3A2418; --on-accent:#1a0e06;
-  --nav:#0A111A; --nav2:#1B2738; --nav-fg:#B6C2D2;
-  --ok:#4ADE80; --ok-bg:#12301F; --warn:#FDA066; --warn-bg:#3A2415; --info:#5CC2F2; --info-bg:#0E2C40;
-  --trans:#7FA8FF; --trans-bg:#1A2B52; --bad:#FB7185; --bad-bg:#3D1620; --neutral:#B6C2D2; --neutral-bg:#233046;
-  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25);color-scheme:dark}
+  --bg:#1A1F14; --surface:#232A1C; --surface2:#2C3523; --border:#39432E; --fg:#EEF0DF; --fg2:#B2B89D; --fg3:#7F866B;
+  --accent:#A5D97F; --accent-d:#BCE79B; --accent-bg:#2E3D22; --on-accent:#14200C;
+  --nav:#12160D; --nav2:#222B19; --nav-fg:#C9CFB2;
+  --ok:#8FDC8A; --ok-bg:#1F3A1D; --warn:#F0B866; --warn-bg:#3A2D12; --info:#6FD0D8; --info-bg:#12363A;
+  --trans:#8FB2F0; --trans-bg:#1D2F52; --bad:#F2877A; --bad-bg:#40201B; --neutral:#C9CFB2; --neutral-bg:#2C3523;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25);color-scheme:dark
+}
 *{box-sizing:border-box}
 html,body{height:100%}
 body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:14px;line-height:1.45;padding-left:0;padding-right:0}
@@ -40,7 +42,7 @@ button{cursor:pointer}
 .side .brand small{color:var(--fg3);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
 .nav-btn{display:flex;align-items:center;gap:10px;background:none;border:0;color:inherit;padding:10px 12px;border-radius:8px;text-align:left;width:100%}
 .nav-btn:hover{background:var(--nav2)}
-.nav-btn[aria-current="page"]{background:var(--nav2);color:#fff;box-shadow:inset 3px 0 0 var(--accent)}
+.nav-btn[aria-current="page"]{background:var(--nav2);color:var(--fg);box-shadow:inset 3px 0 0 var(--accent)}
 .nav-btn svg{flex:none}
 .nav-badge{margin-left:auto;background:var(--accent);color:var(--on-accent);border-radius:99px;padding:0 7px;font-size:11px;font-weight:600}
 .side .sp{flex:1}
@@ -105,7 +107,7 @@ tr.click{cursor:pointer}tr.click:hover{background:var(--surface2)}
 pre.doc{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;font:12px/1.5 var(--mono);overflow-x:auto;white-space:pre;margin:0}
 .sigbox{border:1px dashed var(--fg3);border-radius:8px;background:#fff;touch-action:none;display:block;width:100%;height:150px}
 .sigprev{background:#fff;border-radius:6px;border:1px solid var(--border);height:46px;width:130px;color:#1e293b}
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--nav);color:#fff;padding:10px 16px;border-radius:10px;z-index:80;box-shadow:var(--shadow);max-width:90vw}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:10px;z-index:80;box-shadow:var(--shadow);max-width:90vw}
 .cart{display:flex;flex-direction:column;gap:6px}
 .cart-item{display:flex;align-items:center;gap:8px;background:var(--surface2);border-radius:8px;padding:8px 10px;flex-wrap:wrap}
 .cart-item .t{flex:1;min-width:140px;font-weight:600}
@@ -183,7 +185,8 @@ async function load(){
   if(!DB||DB.v!==2){DB=seed();save(true)}
 }
 function save(now){cloudTouch();clearTimeout(saveT);const run=async()=>{const copy=JSON.parse(JSON.stringify(DB));try{if(idbOK)await idbSet(copy);else localStorage.setItem('almox_db',JSON.stringify(copy))}catch(e){try{localStorage.setItem('almox_db',JSON.stringify(copy))}catch(_){}}};if(now)run();else saveT=setTimeout(run,150)}
-function commit(){save();render()}
+function commit(){save(true);render()}
+addEventListener('pagehide',()=>save(true));document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')save(true)});
 const getF=c=>DB.ferramentas.find(x=>x.codigo.toLowerCase()===String(c).trim().toLowerCase());
 const getC=c=>DB.caixas.find(x=>x.codigo.toLowerCase()===String(c).trim().toLowerCase());
 const getA=c=>DB.alugados.find(x=>x.codigo.toLowerCase()===String(c).trim().toLowerCase());
@@ -339,7 +342,7 @@ function render(){
   const tab=TABS.find(t=>t[0]===ui.tab);
   $('#app').innerHTML=`<aside class="side" id="side"><div class="brand"><div class="logo"><img src="${LOGO}" alt="Usinara Industrial"></div><small>Almoxarifado</small></div>
    ${TABS.map(t=>`<button class="nav-btn" data-tab="${t[0]}" ${t[0]===ui.tab?'aria-current="page"':''}>${ic(t[2])}<span>${t[1]}</span>${badge(t[0])}</button>`).join('')}
-   <div class="sp"></div><div class="nav-btn" id="cloudPill" style="cursor:default;font-size:12.5px"></div><button class="nav-btn" id="themeBtn">${ic('moon')}<span>Alternar tema</span></button><button class="nav-btn" id="cfgBtn">${ic('file')}<span>Backup e dados</span></button></aside>
+   <div class="sp"></div><div id="offPill" style="padding:2px 12px;font-size:12px;opacity:.85"></div><div class="nav-btn" id="cloudPill" style="cursor:default;font-size:12.5px"></div><button class="nav-btn" id="themeBtn">${ic('moon')}<span>Alternar tema</span></button><button class="nav-btn" id="cfgBtn">${ic('file')}<span>Backup e dados</span></button></aside>
   <div class="main"><div class="top"><button class="icon-btn menu" id="menuBtn" aria-label="Menu">${ic('menu',22)}</button><h1>${tab[1]}</h1>
    <select id="almoxSel" style="width:auto" aria-label="Almoxarifado"><option value="Todos">Todos os almoxarifados</option>${ALM.L.map(a=>`<option${ui.almox===a?' selected':''}>${a}</option>`).join('')}</select>
    <button class="btn pri" data-go="EMP">${ic('out',16)} Empréstimo</button><button class="btn" data-go="DEV">${ic('inn',16)} Devolução</button></div>
@@ -354,7 +357,7 @@ function bindApp(){
   $('#almoxSel').onchange=e=>{ui.almox=e.target.value;render()};
   document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{ui.cartMode=b.dataset.go;go('terminal')});
   $('#menuBtn').onclick=()=>{$('#side').classList.add('open');$('#scrim').classList.add('open')};
-  updatePill();$('#themeBtn').onclick=toggleTheme;$('#cfgBtn').onclick=()=>go('rel');
+  updatePill();updateOff();$('#themeBtn').onclick=toggleTheme;$('#cfgBtn').onclick=()=>go('rel');
   const act=ACT[ui.tab];if(act)act();
 }
 function go(t){ui.tab=t;$('#scrim').classList.remove('open');history.replaceState(null,'','#'+t);render();$('.content')?.scrollTo(0,0)}
@@ -727,6 +730,7 @@ const canon=o=>JSON.stringify(o,(k,v)=>v&&typeof v==='object'&&!Array.isArray(v)
 const dkey=(c,k)=>c+'/'+encodeURIComponent(k);
 function localDocs(){const m={};for(const [c,arr,kf] of COLLS)for(const o of DB[arr])m[dkey(c,kf(o))]=canon(o);return m}
 function setStatus(st,msg){CLOUD.status=st;CLOUD.msg=msg||'';updatePill();if(ui.tab==='rel')render()}
+function updateOff(){const e=$('#offPill');if(e)e.textContent=window.__swReady?'✓ Disponível offline':''}
 function updatePill(){const e=$('#cloudPill');if(!e)return;if(IN_ARTIFACT){e.style.display='none';return}
   const M={off:['Nuvem desligada','#94A3B8'],conectando:['Conectando à nuvem…','#F59E0B'],online:['Nuvem sincronizada','#22C55E'],sincronizando:['Sincronizando…','#F59E0B'],offline:['Sem internet (dados locais)','#94A3B8'],erro:['Erro na nuvem','#EF4444'],login:['Nuvem: entrar','#F59E0B']}[CLOUD.status]||['','#94A3B8'];
   e.innerHTML=`<span style="width:9px;height:9px;border-radius:50%;background:${M[1]};flex:none"></span><span>${M[0]}</span>`;e.title=CLOUD.msg||''}
@@ -808,4 +812,4 @@ addEventListener('offline',()=>{if(CLOUD.db)setStatus('offline')});
   try{if('wakeLock'in navigator){const lock=()=>navigator.wakeLock.request('screen').catch(()=>{});lock();document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')lock()})}}catch(e){}
 })();
 </script>
-<script>if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))</script></body></html>
+<script>if("serviceWorker"in navigator){addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));navigator.serviceWorker.ready.then(()=>{window.__swReady=true;try{updateOff()}catch(e){}})}</script></body></html>
